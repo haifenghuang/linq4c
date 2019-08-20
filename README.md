@@ -1,7 +1,7 @@
 # Linq for C
 
-![IMG1](img/Linq4c_1.svg)
-![IMG2](img/Linq4c_2.svg)
+![IMG1](img/Linq4c_1.png)
+![IMG2](img/Linq4c_2.png)
 
 ## Features
 
