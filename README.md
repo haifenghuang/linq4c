@@ -1,4 +1,4 @@
-# LinQ for C
+# Linq for C
 
 ![IMG1](img/Linq4c_1.svg)
 ![IMG2](img/Linq4c_2.svg)
@@ -24,7 +24,6 @@ bool WhereCallback(void *item) {
 }
 
 void *SelectCallback(void *item) {
-    char *str = (char *)item;
     char *newStr = gc_malloc(64);
     sprintf(newStr, "%s_1", (char *)item);
     return newStr;
@@ -77,7 +76,6 @@ ArrayList testLinq(ArrayList array) {
                 }))
         ->Select(lq,
                  lambda(void *, (void *item) {
-                     char *str = (char *)item;
                      char *newStr = gc_malloc(64);
                      sprintf(newStr, "%s_1", (char *)item);
                      return newStr;
@@ -118,7 +116,6 @@ bool WhereCallback(void *item) {
 }
 
 void *SelectCallback(void *item) {
-    char *str = (char *)item;
     char *newStr = gc_malloc(64);
     sprintf(newStr, "%s_1", (char *)item);
     return newStr;
