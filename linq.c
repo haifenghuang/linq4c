@@ -1,4 +1,6 @@
 #include <string.h>
+#include <sys/types.h>
+#include <regex.h>
 #include "linq.h"
 #include "hashmap.h"
 #include "malloc.h"
@@ -1192,6 +1194,19 @@ static Linq *linq_append(Linq *lq, void *item) {
     return lq;
 }
 
+static void linq_forEach(Linq *lq, ForEachAction action) {
+    ArrayList arr = (ArrayList)lq->container;
+    int length = arrlist_size(arr);
+
+    for (int i = 0; i < length; i++) {
+        void *item = arrlist_get(arr, i);
+        action(i, item);
+    }
+}
+
+void linq_write(Linq *lq, char *separator, Selector selectFn) {
+}
+
 static ArrayList linq_toArray(Linq *lq) {
     return (ArrayList)lq->container;
 }
@@ -1265,22 +1280,43 @@ Linq *From(void *container) {
     lq->Prepend             = linq_prepend;
     lq->Append              = linq_append;
 
+    lq->ForEach             = linq_forEach;
+
     lq->ToArray             = linq_toArray;
 
     return lq;
 }
 
-Linq *Range(int start, int count) {
+Linq *RangeWithStep(int start, int count, int step) {
     ArrayList result = arrlist_new();
 
-    int end = start + count;
-    for (int i = start; i < end; i++) {
+    for (int i = 0; i < count; i++) {
         int *item = gc_malloc(sizeof(int));
-        *item = i;
+        *item = start + i * step;
         arrlist_append(result, item);
     }
 
     return From(result);
+}
+
+Linq *Range(int start, int count) {
+    return RangeWithStep(start, count, 1);
+}
+
+Linq *RangeDownWithStep(int start, int count, int step) {
+    ArrayList result = arrlist_new();
+
+    for (int i = 0; i < count; i++) {
+        int *item = gc_malloc(sizeof(int));
+        *item = start - i * step;
+        arrlist_append(result, item);
+    }
+
+    return From(result);
+}
+
+Linq *RangeDown(int start, int count) {
+    return RangeDownWithStep(start, count, 1);
 }
 
 Linq *Repeat(void *item, int itemSize, int count) {
@@ -1298,5 +1334,75 @@ Linq *Repeat(void *item, int itemSize, int count) {
 
 Linq *Empty() {
     return From(arrlist_new());
+}
+
+Linq *Cycle(void *container, int count) {
+    ArrayList arr = (ArrayList)container;
+    int length = arrlist_size(arr);
+
+    if (length == 0 || count <= 0) {
+        return From(container);
+    }
+
+    ArrayList newArr = arrlist_new();
+    int j = 0;
+    while (j++ < count) {
+        for (int i = 0; i < length; i++) {
+            void *item = arrlist_get(arr, i);
+            arrlist_append(newArr, item);
+        }
+    }
+
+    return From(newArr);
+}
+
+Linq *Matches(bool ignoreCase, char *input, char *pattern) {
+    ArrayList arr = arrlist_new();
+
+    int status;
+    regex_t regex;
+    char *pstr = input;
+ 
+    /* REG_EXTENDED: Compile modern ("extended") REs.
+     * REG_NEWLINE: Compile for newline-sensitive matching.
+     * */
+    int cflags = REG_EXTENDED | REG_NEWLINE;
+
+    if (ignoreCase) {
+        cflags |= REG_ICASE;
+    }
+
+    status = regcomp(&regex, pattern, cflags);
+    if (status == 0) {
+        int numGroups = regex.re_nsub;
+        regmatch_t groups[numGroups + 1];
+
+        for (int m = 0; m < MAX_MATCHES; m++) {
+            if (regexec(&regex, pstr, numGroups + 1, groups, 0)) {
+                break;
+            }
+
+            for (int g = 1; g <= numGroups; g++) {
+                if (groups[g].rm_so == (size_t)-1) {
+                    break; /* No more groups */
+                }
+
+                /* rm_so: regex-match, start-offset */
+                /* rm_eo: regex-match, end-offset */
+                int length = groups[g].rm_eo - groups[g].rm_so;
+                char *match = gc_malloc(length);
+                strncpy(match, pstr + groups[g].rm_so, length);
+                match[length] = '\0';
+                arrlist_append(arr, match);
+
+            }
+
+            pstr += groups[0].rm_eo; /* Restart from last match */
+        } /* end for */
+    }
+
+    regfree(&regex);
+
+    return From(arr);
 }
 

@@ -636,6 +636,27 @@ int main(int argc, char **argv) {
         printf("%d\n", *(int *)arrlist_get(rangeArr, i));
     }
 
+    printf("\n====================RangeWithStep====================\n");
+    Linq *rangeStepLq = RangeWithStep(3, 3, 5);
+    ArrayList rangeStepArr = rangeStepLq->ToArray(rangeStepLq);
+    for (int i = 0; i < arrlist_size(rangeStepArr); i++) {
+        printf("%d\n", *(int *)arrlist_get(rangeStepArr, i));
+    }
+
+    printf("\n====================RangeDown====================\n");
+    Linq *rangeDownLq = RangeDown(3, 5);
+    ArrayList rangeDownArr = rangeDownLq->ToArray(rangeDownLq);
+    for (int i = 0; i < arrlist_size(rangeDownArr); i++) {
+        printf("%d\n", *(int *)arrlist_get(rangeDownArr, i));
+    }
+
+    printf("\n====================RangeWithStep====================\n");
+    Linq *rangeDownStepLq = RangeDownWithStep(3, 3, 5);
+    ArrayList rangeDownStepArr = rangeDownStepLq->ToArray(rangeDownStepLq);
+    for (int i = 0; i < arrlist_size(rangeDownStepArr); i++) {
+        printf("%d\n", *(int *)arrlist_get(rangeDownStepArr, i));
+    }
+
     printf("\n====================Repeat====================\n");
     struct Person{
         char name[32];
@@ -936,6 +957,32 @@ int main(int argc, char **argv) {
     }
 
 
+    printf("\n====================Cycle & ForEach====================\n");
+    ArrayList arrayCycle = arrlist_new();
+    arrlist_append(arrayCycle, str1);
+    arrlist_append(arrayCycle, str2);
+    arrlist_append(arrayCycle, str3);
+
+    Linq *lq= Cycle(arrayCycle, 3);
+    printf("Cycle count =[%d]\n", lq->Count(lq));
+    lq->ForEach(lq, lambda(void, (int idx, void *item) {
+                    printf("%d:%s\n", idx, (char *)item);
+               }));
+
+
+    printf("\n====================Match(1)====================\n");
+    char* stringInput1 = "___ abc123def ___ ghi456 ___";
+    lq = Matches(true, stringInput1, "[a-z]*([0-9]+)([a-z]*)");
+    lq->ForEach(lq, lambda(void, (int idx, void *item) {
+                    printf("[%d] : %s\n", idx, (char *)item);
+               }));
+
+    printf("\n====================Match(2)====================\n");
+    char* stringInput2 = "text123";
+    lq = Matches(true, stringInput2, "([a-z]+)([0-9]+)");
+    lq->ForEach(lq, lambda(void, (int idx, void *item) {
+                    printf("[%d] : %s\n", idx, (char *)item);
+               }));
 
 
     printf("\n\n");
