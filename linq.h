@@ -13,6 +13,8 @@
 
 #define lambda(ret, body) ({ ret __fn__ body __fn__; })
 
+#define TOINT(item)   (*(int *)(item))
+
 #define COMPARE_NUM(a, b) do{ \
     if ((a) > (b)) return 1; \
     if ((b) > (a)) return -1; \
@@ -51,6 +53,8 @@ typedef void (*ForEachAction)(int, void *);
 #define TAKE(num)                                       Take(LINQ_PTR, num)
 #define TAKE_WHILE(predicateFn)                         TakeWhile(LINQ_PTR, predicateFn)
 #define TAKE_WHILE_INDEXED(predicateIdxFn)              TakeWhileIndexed(LINQ_PTR, predicateIdxFn)
+#define TAKE_EXCEPT_LAST(count)                         TakeExceptLast(LINQ_PTR, count)
+#define TAKE_FROM_LAST(count)                           TakeFromLast(LINQ_PTR, count)
 #define SKIP(num)                                       Skip(LINQ_PTR, num)
 #define SKIP_WHILE(predicateFn)                         Skipwhile(LINQ_PTR, predicateFn)
 #define SKIP_WHILE_INDEXED(predicateIdxFn)              SkipWhileIndexed(LINQ_PTR, predicateIdxFn)
@@ -59,6 +63,7 @@ typedef void (*ForEachAction)(int, void *);
 #define REVERSE()                                       Reverse(LINQ_PTR)
 #define DISTINCT(equalityFn)                            Distinct(LINQ_PTR, equalityFn)
 #define INDEXOF(predicateFn)                            IndexOf(LINQ_PTR, predicateFn)
+#define LAST_INDEXOF(predicateFn)                       LastIndexOf(LINQ_PTR, predicateFn)
 #define CONCAT(otherLinq)                               Concat(LINQ_PTR, otherLinq)
 #define EXCEPT(otherLinq, equalityFn)                   Except(LINQ_PTR, otherLinq, equalityFn)
 #define UNION(otherLinq, equalityFn)                    Union(LINQ_PTR, otherLinq, equalityFn)
@@ -107,6 +112,9 @@ typedef void (*ForEachAction)(int, void *);
 
 #define FOREACH(action)                                 ForEach(LINQ_PTR, action)
 
+#define ALTERNATE_BEFORE(value)                         AlternateBefore(LINQ_PTR, value)
+#define ALTERNATE_AFTER(value)                          AlternateAfter(LINQ_PTR, value)
+
 #define TO_ARRAY()                                      ToArray(LINQ_PTR)
 
 /* Used to store `GroupBy` result. */
@@ -139,6 +147,8 @@ struct tagLinq {
     Linq *(*Take)(Linq *lq, int number);
     Linq *(*TakeWhile)(Linq *lq, Predicate predicateFn);
     Linq *(*TakeWhileIndexed)(Linq *lq, PredicateIdx predicateIdxFn);
+    Linq *(*TakeExceptLast)(Linq *lq, int count);
+    Linq *(*TakeFromLast)(Linq *lq, int count);
 
     /* Bypasses a specified number of elements in a sequence and then returns the remaining elements. */
     Linq *(*Skip)(Linq *lq, int number);
@@ -159,8 +169,10 @@ struct tagLinq {
     /* Returns distinct elements from a sequence by using the equality function.*/
     void *(*Distinct)(Linq *lq, Equality equalityFn);
 
-    /* Returns the element at a specified index in a sequence. */
+    /* Returns the zero-based index of the first occurrence within a sequence. */
     int (*IndexOf)(Linq *lq, Predicate predicateFn);
+    /* Returns the last index of the first occurrence within a sequence. */
+    int (*LastIndexOf)(Linq *lq, Predicate predicateFn);
 
     /* Concatenates two sequences. */
     Linq *(*Concat)(Linq *lq, Linq *otherLinq);
@@ -247,6 +259,9 @@ struct tagLinq {
     /* Iterate a sequence. */
     void (*ForEach)(Linq *lq, ForEachAction action);
 
+    Linq *(*AlternateBefore)(Linq *lq, void *value);
+    Linq *(*AlternateAfter)(Linq *lq, void *value);
+
     /* Returns the containing array of the linq sequence. */
     ArrayList (*ToArray)(Linq *lq);
 };
@@ -256,6 +271,7 @@ extern Linq *From(void *container);
 
 /* Generates a sequence of integral numbers within a specified range. */
 extern Linq *Range(int start, int count);
+extern Linq *RangeTo(int start, int to);
 extern Linq *RangeWithStep(int start, int count, int step);
 extern Linq *RangeDown(int start, int count);
 extern Linq *RangeDownWithStep(int start, int count, int step);

@@ -154,6 +154,76 @@ int main(int argc, char **argv) {
 
 ```
 
+## What's implemented
+
+-----
+
+- [x] Where
+- [x] WhereIndexed
+- [x] Select
+- [x] SelectIndexed
+- [x] SelectMany
+- [x] SelectManyIndexed
+- [x] SelectManyBy
+- [x] FirstOrDefault
+- [x] LastOrDefault
+- [x] Take
+- [x] TakeWhile
+- [x] TakeWhileIndexed
+- [x] TakeExceptLast
+- [x] TakeFromLast
+- [x] Skip
+- [x] SkipWhile
+- [x] SkipWhileIndexed
+- [x] Any
+- [x] All
+- [x] Reverse
+- [x] IndexOf
+- [x] LastIndexOf
+- [x] Concat
+- [x] Except
+- [x] Union
+- [x] Intersect
+- [x] SumInts
+- [x] SumFloats
+- [x] MaxInts
+- [x] MaxFloats
+- [x] MinInts
+- [x] MinFloats
+- [x] AverageInts
+- [x] AverageFloats
+- [x] Max
+- [x] Min
+- [x] OrderBy
+- [x] OrderByDesc
+- [x] GroupBy
+- [x] Zip
+- [x] Single
+- [x] SingleWith
+- [x] Contains
+- [x] Count
+- [x] CountWith
+- [x] Join
+- [x] GroupJoin
+- [x] Aggregate
+- [x] AggregateWithSeed
+- [x] AggregateWithSeedBy
+- [x] SequenceEqual
+- [x] Prepend
+- [x] Append
+- [x] ForEach
+- [x] AlternateBefore
+- [x] AlternateAfter
+- [x] Range
+- [x] RangeTo
+- [x] RangeWithStep
+- [x] RangeDown
+- [x] RangeDownWithStep
+- [x] Repeat
+- [x] Empty
+- [x] Cycle
+- [x] Matches
+
 ## Credits
 
 * faisalabujabal:

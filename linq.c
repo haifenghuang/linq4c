@@ -262,6 +262,53 @@ static Linq *linq_takeWhileIndexed(Linq *lq, PredicateIdx predicateIdxFn) {
     return lq;
 }
 
+static Linq *linq_takeExceptLast(Linq *lq, int count) {
+    ArrayList arr = (ArrayList)lq->container;
+    int length = arrlist_size(arr);
+
+    if (length == 0 || count <= 0) {
+        return lq;
+    }
+
+    ArrayList result = arrlist_new();
+    if (count >= length) {
+        lq->container = result;
+        return lq;
+    }
+
+    for (int i = 0; i < (length - count); i++) {
+        void *item = arrlist_get(arr, i);
+        arrlist_append(result, item);
+    }
+
+    lq->container = result;
+    return lq;
+
+}
+
+static Linq *linq_takeFromLast(Linq *lq, int count) {
+    ArrayList arr = (ArrayList)lq->container;
+    int length = arrlist_size(arr);
+
+    ArrayList result = arrlist_new();
+    if (length == 0 || count <= 0) {
+        lq->container = result;
+        return lq;
+    }
+
+    if (count >= length) {
+        return lq;
+    }
+
+    for (int i = length - count; i < length; i++) {
+        void *item = arrlist_get(arr, i);
+        arrlist_append(result, item);
+    }
+
+    lq->container = result;
+    return lq;
+}
+
 static Linq *linq_skip(Linq *lq, int number) {
     ArrayList arr = (ArrayList)lq->container;
     int length = arrlist_size(arr);
@@ -274,7 +321,6 @@ static Linq *linq_skip(Linq *lq, int number) {
 
     for (int i = number; i < length; i++) {
         void *item = arrlist_get(arr, i);
-
         arrlist_append(result, item);
     }
 
@@ -425,11 +471,20 @@ static int linq_indexOf(Linq *lq, Predicate predicateFn) {
     ArrayList arr = (ArrayList)lq->container;
     int length = arrlist_size(arr);
 
-    if (length == 0) {
-        return -1;
-    }
-
     for (int i = 0; i < length; i++) {
+        void *item = arrlist_get(arr, i);
+        if (predicateFn(item)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+static int linq_lastIndexOf(Linq *lq, Predicate predicateFn) {
+    ArrayList arr = (ArrayList)lq->container;
+    int length = arrlist_size(arr);
+
+    for (int i = length -1; i >= 0; i--) {
         void *item = arrlist_get(arr, i);
         if (predicateFn(item)) {
             return i;
@@ -1204,8 +1259,46 @@ static void linq_forEach(Linq *lq, ForEachAction action) {
     }
 }
 
-void linq_write(Linq *lq, char *separator, Selector selectFn) {
+static Linq *linq_alternateBefore(Linq *lq, void *value) {
+    ArrayList arr = (ArrayList)lq->container;
+    int length = arrlist_size(arr);
+
+    ArrayList result = arrlist_new();
+    if (length == 0) {
+        arrlist_append(result, value);
+        lq->container = result;
+        return lq;
+    }
+
+    for (int i = 0; i < length; i++) {
+        arrlist_append(result, value);
+        void *item = arrlist_get(arr, i);
+        arrlist_append(result, item);
+    }
+
+    lq->container = result;
+    return lq;
 }
+
+static Linq *linq_alternateAfter(Linq *lq, void *value) {
+    ArrayList arr = (ArrayList)lq->container;
+    int length = arrlist_size(arr);
+
+    ArrayList result = arrlist_new();
+    if (length == 0) {
+        return lq;
+    }
+
+    for (int i = 0; i < length; i++) {
+        void *item = arrlist_get(arr, i);
+        arrlist_append(result, item);
+        arrlist_append(result, value);
+    }
+
+    lq->container = result;
+    return lq;
+}
+
 
 static ArrayList linq_toArray(Linq *lq) {
     return (ArrayList)lq->container;
@@ -1228,6 +1321,8 @@ Linq *From(void *container) {
     lq->Take                = linq_take;
     lq->TakeWhile           = linq_takeWhile;
     lq->TakeWhileIndexed    = linq_takeWhileIndexed;
+    lq->TakeExceptLast      = linq_takeExceptLast;
+    lq->TakeFromLast        = linq_takeFromLast;
     lq->Skip                = linq_skip;
     lq->SkipWhile           = linq_skipWhile;
     lq->SkipWhileIndexed    = linq_skipWhileIndexed;
@@ -1235,6 +1330,7 @@ Linq *From(void *container) {
     lq->All                 = linq_all;
     lq->Reverse             = linq_reverse;
     lq->IndexOf             = linq_indexOf;
+    lq->LastIndexOf         = linq_lastIndexOf;
     lq->Concat              = linq_concat;
     lq->Except              = linq_except;
     lq->Union               = linq_union;
@@ -1282,6 +1378,9 @@ Linq *From(void *container) {
 
     lq->ForEach             = linq_forEach;
 
+    lq->AlternateBefore     = linq_alternateBefore;
+    lq->AlternateAfter      = linq_alternateAfter;
+
     lq->ToArray             = linq_toArray;
 
     return lq;
@@ -1301,6 +1400,25 @@ Linq *RangeWithStep(int start, int count, int step) {
 
 Linq *Range(int start, int count) {
     return RangeWithStep(start, count, 1);
+}
+
+Linq *RangeTo(int start, int to) {
+    ArrayList result = arrlist_new();
+    if (start >= to) {
+        for (int i = start; i >= to; i--) {
+            int *item = gc_malloc(sizeof(int));
+            *item = i;
+            arrlist_append(result, item);
+        }
+    } else {
+        for (int i = start; i <= to; i++) {
+            int *item = gc_malloc(sizeof(int));
+            *item = i;
+            arrlist_append(result, item);
+        }
+    }
+
+    return From(result);
 }
 
 Linq *RangeDownWithStep(int start, int count, int step) {
