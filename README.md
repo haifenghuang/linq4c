@@ -7,7 +7,7 @@
 
 - Most of the LINQ methods(50+) are supported.
 - Chaining of LINQ methods are supported.
-- Lambda is supported(slow).
+- Pseudo lambda is supported(slow).
 
 ## Examples
 
