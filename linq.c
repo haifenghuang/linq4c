@@ -1,6 +1,8 @@
 #include <string.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <regex.h>
+#include <time.h>
 #include "linq.h"
 #include "hashmap.h"
 #include "malloc.h"
@@ -1299,6 +1301,37 @@ static Linq *linq_alternateAfter(Linq *lq, void *value) {
     return lq;
 }
 
+static Linq *linq_shuffle(Linq *lq) {
+    ArrayList arr = (ArrayList)lq->container;
+    int length = arrlist_size(arr);
+
+    if (length == 0) {
+        return lq;
+    }
+
+    for (int i = length - 1; i > 0; i--) {
+        static unsigned int seed = 0;
+
+        if (seed == 0) {
+            time_t t = time(NULL);
+            seed = t ^ (t << 16);
+        }
+
+        seed = (seed * 58321) + 11113;
+        int v = (seed >> 16);
+        srand(v);
+        int idx = rand() % (i + 1); // rand() % (upper - lower + 1) + lower :  lower ~ upper
+        
+        void *item1 = arrlist_get(arr, i);
+        void *item2 = arrlist_get(arr, idx);
+
+        //swap the two items
+        arrlist_set(arr, i, item2);
+        arrlist_set(arr, idx, item1);
+    }
+
+    return lq;
+}
 
 static ArrayList linq_toArray(Linq *lq) {
     return (ArrayList)lq->container;
@@ -1380,6 +1413,8 @@ Linq *From(void *container) {
 
     lq->AlternateBefore     = linq_alternateBefore;
     lq->AlternateAfter      = linq_alternateAfter;
+
+    lq->Shuffle             = linq_shuffle;
 
     lq->ToArray             = linq_toArray;
 

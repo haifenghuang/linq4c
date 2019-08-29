@@ -26,11 +26,13 @@ static pthread_mutex_t ll_mtx = PTHREAD_MUTEX_INITIALIZER;
 
 void SIGNALHANDLER();
 
+#if 0
 #undef malloc
 #undef calloc
 #undef realloc
 #undef free
 #undef pthread_join
+#endif
 
 static long _numThreads;
 static pthread_cond_t _mainThreadCond = PTHREAD_COND_INITIALIZER;

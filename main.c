@@ -501,6 +501,16 @@ ArrayList testWithAlternateAfter(ArrayList alternateAfterArr) {
     return result;
 }
 
+ArrayList testWithShuffle(ArrayList shuffleArr) {
+    Linq *lq = From(shuffleArr);
+    ArrayList result = 
+        lq
+        ->Shuffle(lq)
+        ->ToArray(lq);
+
+    return result;
+}
+
 int main(int argc, char **argv) {
     gc_init();
 
@@ -1056,6 +1066,18 @@ int main(int argc, char **argv) {
         printf("%d\n", TOINT(arrlist_get(alternateAfterResult, i)));
     }
 
+    printf("\n====================Shuffle====================\n");
+    ArrayList shuffleArr = arrlist_new();
+    for (int i = 0; i < 10; i++) {
+        int *x = gc_malloc(sizeof(int));
+        *x = i * 2 + 3;
+         arrlist_append(shuffleArr, x);
+    }
+    ArrayList shuffleResult = testWithShuffle(shuffleArr);
+    for (int i = 0; i < arrlist_size(shuffleResult); i++) {
+        printf("%d\n", TOINT(arrlist_get(shuffleResult, i)));
+    }
+    
 
     printf("\n====================Cycle & ForEach====================\n");
     ArrayList arrayCycle = arrlist_new();

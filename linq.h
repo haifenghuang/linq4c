@@ -115,6 +115,7 @@ typedef void (*ForEachAction)(int, void *);
 #define ALTERNATE_BEFORE(value)                         AlternateBefore(LINQ_PTR, value)
 #define ALTERNATE_AFTER(value)                          AlternateAfter(LINQ_PTR, value)
 
+#define SHUFFLE()                                       Shuffle(LINQ_PTR)
 #define TO_ARRAY()                                      ToArray(LINQ_PTR)
 
 /* Used to store `GroupBy` result. */
@@ -261,6 +262,9 @@ struct tagLinq {
 
     Linq *(*AlternateBefore)(Linq *lq, void *value);
     Linq *(*AlternateAfter)(Linq *lq, void *value);
+
+    /* Inline shuffle */
+    Linq *(*Shuffle)(Linq *lq);
 
     /* Returns the containing array of the linq sequence. */
     ArrayList (*ToArray)(Linq *lq);

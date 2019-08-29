@@ -10,11 +10,13 @@
 #include <stddef.h>
 #include <pthread.h>
 
+#if 0
 #define malloc(size) gc_malloc(size)
 #define realloc(ptr, size) gc_realloc(ptr, size)
 #define calloc(nmemb, size) gc_calloc(nmemb, size)
 #define free(ptr) gc_free(ptr)
 #define pthread_join(thread, retval) gc_pthread_join(thread, retval)
+#endif
 
 int _CLEAN_FLAG;
 void SIGNALHANDLER();

@@ -1,4 +1,4 @@
-# Linq for C
+﻿# Linq for C
 
 ![IMG1](img/Linq4c_1.png)
 ![IMG2](img/Linq4c_2.png)
@@ -7,7 +7,7 @@
 
 - Most of the LINQ methods(50+) are supported.
 - Chaining of LINQ methods are supported.
-- Pseudo lambda is supported(slow).
+- Lambda is supported(slow).
 
 ## Examples
 
@@ -214,15 +214,7 @@ int main(int argc, char **argv) {
 - [x] ForEach
 - [x] AlternateBefore
 - [x] AlternateAfter
-- [x] Range
-- [x] RangeTo
-- [x] RangeWithStep
-- [x] RangeDown
-- [x] RangeDownWithStep
-- [x] Repeat
-- [x] Empty
-- [x] Cycle
-- [x] Matches
+- [x] Shuffle
 
 ## Credits
 
