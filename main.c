@@ -36,10 +36,7 @@ ArrayList testWithNormal(ArrayList array) {
             return str[0] == 'h';
         }))
         ->Select(lq, lambda(void *, (void *item) {
-            char *str = (char *)item;
-            char *newStr = gc_malloc(64);
-            sprintf(newStr, "%s_1", (char *)item);
-            return newStr;
+            return newStr("%s_1", (char *)item);
         }))
         ->ToArray(lq);
     return result;
@@ -48,14 +45,9 @@ ArrayList testWithNormal(ArrayList array) {
 ArrayList testWithNormal2() {
     Linq *lq = Range(3, 2);
 
-    int *a1 = gc_malloc(sizeof(int));
-    *a1 = 5;
-
-    int *a2 = gc_malloc(sizeof(int));
-    *a2 = 2;
-
-    int *a3 = gc_malloc(sizeof(int));
-    *a3 = 1;
+    int *a1 = newInt(5);
+    int *a2 = newInt(2);
+    int *a3 = newInt(1);
 
     ArrayList result =
         lq
@@ -179,8 +171,8 @@ void *testWithMin(ArrayList array) {
 ArrayList testWithPrepend(ArrayList array) {
     Linq *lq = From(array);
 
-    char *str = gc_malloc(64);
-    strcpy(str, "10000000");
+    char *str = newStr("10000000");
+    
     ArrayList result = 
         lq
         ->Prepend(lq, str)
@@ -192,8 +184,8 @@ ArrayList testWithPrepend(ArrayList array) {
 ArrayList testWithAppend(ArrayList array) {
     Linq *lq = From(array);
 
-    char *str = gc_malloc(64);
-    strcpy(str, "10000000");
+    char *str = newStr("10000000");
+
     ArrayList result = 
         lq
         ->Append(lq, str)
@@ -345,8 +337,7 @@ ArrayList testWithGroupJoin(Linq *innerLinq, ArrayList outerArr) {
                         return item; }),
                     lambda(void *, (void *item) {
                         int x = TOINT(item);
-                        int *result = gc_malloc(sizeof(int));
-                        *result = x % 2; 
+                        int *result = newInt(x % 2);
                         return result;}),
                     lambda(void *, (void *outerItem, void *innerArray) {
                         int *len = gc_malloc(sizeof(int));
@@ -402,8 +393,7 @@ void *testWithAggregateWithSeedBy(ArrayList arr, char *seed) {
                                 }), 
                             lambda(void *, (void *item) {
                                 //convert to uppercase
-                                char *result = gc_malloc(64);
-                                strcpy(result, (char *)item);
+                                char *result = newStr((char *)item);
                                 for(int i = 0; result[i] != '\0'; i++) {
                                     if (result[i] >= 'a' && result[i] <= 'z') {
                                         result[i] = result[i] - 32;
@@ -476,8 +466,7 @@ ArrayList testWithTakeFrom(ArrayList takeFromArr) {
 }
 
 ArrayList testWithAlternateBefore(ArrayList alternateBeforeArr) {
-    int *x = gc_malloc(sizeof(int));
-    *x = -1;
+    int *x = newInt(-1);
 
     Linq *lq = From(alternateBeforeArr);
     ArrayList result = 
@@ -489,8 +478,7 @@ ArrayList testWithAlternateBefore(ArrayList alternateBeforeArr) {
 }
 
 ArrayList testWithAlternateAfter(ArrayList alternateAfterArr) {
-    int *x = gc_malloc(sizeof(int));
-    *x = -1;
+    int *x = newInt(-1);
 
     Linq *lq = From(alternateAfterArr);
     ArrayList result = 
@@ -828,8 +816,7 @@ int main(int argc, char **argv) {
     printf("\n====================GroupBy(2)====================\n");
     ArrayList groupByArr2 = arrlist_new();
     for (int i = 0; i < 9; i++) {
-        int *x = gc_malloc(sizeof(int));
-        *x = i;
+        int *x = newInt(i);
          arrlist_append(groupByArr2, x);
     }
 
@@ -894,15 +881,13 @@ int main(int argc, char **argv) {
     printf("\n====================GROUP_JOIN====================\n");
     ArrayList groupJoinArr_outer = arrlist_new();
     for (int i = 0; i < 3; i++) {
-        int *x = gc_malloc(sizeof(int));
-        *x = i;
+        int *x = newInt(i);
          arrlist_append(groupJoinArr_outer, x);
     }
 
     ArrayList groupJoinArr_inner = arrlist_new();
     for (int i = 1; i < 10; i++) {
-        int *x = gc_malloc(sizeof(int));
-        *x = i;
+        int *x = newInt(i);
          arrlist_append(groupJoinArr_inner, x);
     }
     Linq *groupJoin_innerLq = From(groupJoinArr_inner);
@@ -949,15 +934,13 @@ int main(int argc, char **argv) {
     printf("\n====================Concat====================\n");
     ArrayList concatArrSrc = arrlist_new();
     for (int i = 1; i < 4; i++) {
-        int *x = gc_malloc(sizeof(int));
-        *x = i;
+        int *x = newInt(i);
          arrlist_append(concatArrSrc, x);
     }
 
     ArrayList concatArrDst = arrlist_new();
     for (int i = 4; i < 6; i++) {
-        int *x = gc_malloc(sizeof(int));
-        *x = i;
+        int *x = newInt(i);
          arrlist_append(concatArrDst, x);
     }
 
@@ -970,16 +953,14 @@ int main(int argc, char **argv) {
     printf("\n====================Sequence Equal====================\n");
     ArrayList seqSrc = arrlist_new();
     for (int i = 1; i < 4; i++) {
-        int *x = gc_malloc(sizeof(int));
-        *x = i;
+        int *x = newInt(i);
          arrlist_append(seqSrc, x);
     }
 
     ArrayList seqDst = arrlist_new();
     for (int i = 1; i < 4; i++) {
-        int *x = gc_malloc(sizeof(int));
-        *x = i;
-         arrlist_append(seqDst, x);
+        int *x = newInt(i);
+        arrlist_append(seqDst, x);
     }
 
     bool isEqual = testWithSequenceEqual(seqSrc, seqDst);
@@ -990,9 +971,8 @@ int main(int argc, char **argv) {
     printf("\n====================Take====================\n");
     ArrayList takeArr = arrlist_new();
     for (int i = 0; i < 10; i++) {
-        int *x = gc_malloc(sizeof(int));
-        *x = i;
-         arrlist_append(takeArr, x);
+        int *x = newInt(i);
+        arrlist_append(takeArr, x);
     }
 
     ArrayList takeResult = testWithTake(takeArr, 3);
@@ -1003,9 +983,8 @@ int main(int argc, char **argv) {
     printf("\n====================TakeWhile====================\n");
     ArrayList takeWhileArr = arrlist_new();
     for (int i = 0; i < 10; i++) {
-        int *x = gc_malloc(sizeof(int));
-        *x = i;
-         arrlist_append(takeWhileArr, x);
+        int *x = newInt(i);
+        arrlist_append(takeWhileArr, x);
     }
 
     ArrayList takeWhileResult = testWithTakeWhile(takeWhileArr);
@@ -1016,9 +995,8 @@ int main(int argc, char **argv) {
     printf("\n====================TakeExceptLast====================\n");
     ArrayList takeExceptArr = arrlist_new();
     for (int i = 0; i < 10; i++) {
-        int *x = gc_malloc(sizeof(int));
-        *x = i;
-         arrlist_append(takeExceptArr, x);
+        int *x = newInt(i);
+        arrlist_append(takeExceptArr, x);
     }
 
     ArrayList takeExceptResult = testWithTakeExcept(takeWhileArr);
@@ -1029,9 +1007,8 @@ int main(int argc, char **argv) {
     printf("\n====================TakeFromLast====================\n");
     ArrayList takeFromArr = arrlist_new();
     for (int i = 0; i < 10; i++) {
-        int *x = gc_malloc(sizeof(int));
-        *x = i;
-         arrlist_append(takeFromArr, x);
+        int *x = newInt(i);
+        arrlist_append(takeFromArr, x);
     }
 
     ArrayList takeFromResult = testWithTakeFrom(takeFromArr);
@@ -1042,9 +1019,8 @@ int main(int argc, char **argv) {
     printf("\n====================AlternateBefore====================\n");
     ArrayList alternateBeforeArr = arrlist_new();
     for (int i = 0; i < 3; i++) {
-        int *x = gc_malloc(sizeof(int));
-        *x = i;
-         arrlist_append(alternateBeforeArr, x);
+        int *x = newInt(i);
+        arrlist_append(alternateBeforeArr, x);
     }
 
     ArrayList alternateBeforeResult = testWithAlternateBefore(alternateBeforeArr);
@@ -1055,9 +1031,8 @@ int main(int argc, char **argv) {
     printf("\n====================AlternateAfter====================\n");
     ArrayList alternateAfterArr = arrlist_new();
     for (int i = 0; i < 3; i++) {
-        int *x = gc_malloc(sizeof(int));
-        *x = i;
-         arrlist_append(alternateAfterArr, x);
+        int *x = newInt(i);
+        arrlist_append(alternateAfterArr, x);
     }
 
 
@@ -1069,8 +1044,7 @@ int main(int argc, char **argv) {
     printf("\n====================Shuffle====================\n");
     ArrayList shuffleArr = arrlist_new();
     for (int i = 0; i < 10; i++) {
-        int *x = gc_malloc(sizeof(int));
-        *x = i * 2 + 3;
+        int *x = newInt(i * 2 + 3);
          arrlist_append(shuffleArr, x);
     }
     ArrayList shuffleResult = testWithShuffle(shuffleArr);

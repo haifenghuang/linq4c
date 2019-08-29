@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <regex.h>
+#include <stdarg.h>
 #include <time.h>
+
 #include "linq.h"
 #include "hashmap.h"
 #include "malloc.h"
@@ -1559,3 +1561,34 @@ Linq *Matches(bool ignoreCase, char *input, char *pattern) {
     return From(arr);
 }
 
+void *newInt(int value) {
+    int *result = (int *)gc_malloc(sizeof(int));
+    *result = value;
+    return result;
+}
+
+void *newFloat(float value) {
+    float *result = (float *)gc_malloc(sizeof(float));
+    *result = value;
+    return result;
+}
+
+void *newStr(char *fmt, ...) {
+    int bufLen = 64;
+    va_list ap;
+
+    char *result = gc_malloc(bufLen * sizeof(char));
+
+    va_start(ap, fmt);
+    int len = vsnprintf(result, bufLen, fmt, ap);
+    if (len >= bufLen) {
+        result = gc_realloc(result, (len + 1) * sizeof(char));
+    }
+    va_end(ap);
+
+    va_start(ap, fmt);
+    vsnprintf(result, len + 1, fmt, ap);
+    va_end(ap);
+
+    return result;
+}

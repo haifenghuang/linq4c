@@ -292,5 +292,10 @@ extern Linq *Cycle(void *container, int count);
 /* Generate a sequence that matches the 'pattern' from source 'input'. */
 extern Linq *Matches(bool ignoreCase, char *input, char *pattern);
 
+/** Other utility function **/
+extern void *newInt(int value);
+extern void *newFloat(float value);
+extern void *newStr(char *fmt, ...);
+
 #endif
 
