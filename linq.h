@@ -95,6 +95,7 @@ typedef void (*ForEachAction)(int, void *);
 #define COUNT()                                         Count(LINQ_PTR)
 #define COUNT_With(predicateFn)                         CountWith(LINQ_PTR, predicateFn)
 
+#define JOIN_STR(separator)                             JoinStr(LINQ_PTR, separator)
 #define JOIN(innerLq, keyEqualityFn, outerKeySelectFn, innerKeySelectFn, resultSelectFn)  \
     Join(LINQ_PTR, innerLq, keyEqualityFn, outerKeySelectFn, innerKeySelectFn, resultSelectFn)
 
@@ -229,6 +230,8 @@ struct tagLinq {
     int (*Count)(Linq *lq);
     int (*CountWith)(Linq *lq, Predicate predicateFn);
 
+    /* Join string using separator */
+    char *(*JoinStr)(Linq *lq, char *separator);
     /* Correlates the elements of two sequences based on matching keys. The equality function is used to compare keys. */
     Linq *(*Join)(Linq *lq,
                   Linq *inner,

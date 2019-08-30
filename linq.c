@@ -989,10 +989,49 @@ static int linq_countWith(Linq *lq, Predicate predicateFn) {
     return result;
 }
 
+static char *linq_joinStr(Linq *lq, char *separator) {
+    ArrayList arr = (ArrayList)lq->container;
+    int length = arrlist_size(arr);
+
+    if (length == 0) {
+        return newStr("");
+    }
+
+    bool isEmpty = (separator == NULL || separator[0] == '\0');
+    /* get total lenth we need to allocate */
+    int total_len = 0;
+    for (int i = 0; i < length; i++) {
+        char *item = (char *)arrlist_get(arr, i);
+        if (isEmpty) {
+            total_len += strlen(item);
+        } else {
+            total_len += strlen(item) + strlen(separator);
+        }
+    }
+    total_len += 1;
+
+    char *result = gc_calloc(total_len, sizeof(char));
+
+    for (int i = 0; i < length; i++) {
+        char *item = (char *)arrlist_get(arr, i);
+        if (isEmpty) {
+            sprintf(result + strlen(result), "%s", item);
+        } else {
+            if (i == length - 1) {
+                sprintf(result + strlen(result), "%s", item);
+            } else {
+                sprintf(result + strlen(result), "%s%s", item, separator);
+            }
+        }
+    }
+
+    return result;
+}
+
 static Linq *linq_join(Linq *lq,
-                       Linq *inner, 
-                       Equality keyEqualityFn, 
-                       Selector outerKeySelectFn, 
+                       Linq *inner,
+                       Equality keyEqualityFn,
+                       Selector outerKeySelectFn,
                        Selector innerKeySelectFn,
                        ResultSelector resultSelectFn) {
     ArrayList outerArr= (ArrayList)lq->container;
@@ -1074,9 +1113,9 @@ static Linq *linq_join(Linq *lq,
 }
 
 static Linq *linq_groupJoin(Linq *lq,
-                            Linq *inner, 
-                            Equality keyEqualityFn, 
-                            Selector outerKeySelectFn, 
+                            Linq *inner,
+                            Equality keyEqualityFn,
+                            Selector outerKeySelectFn,
                             Selector innerKeySelectFn,
                             ResultSelector resultSelectFn) {
     ArrayList outerArr= (ArrayList)lq->container;
@@ -1323,7 +1362,7 @@ static Linq *linq_shuffle(Linq *lq) {
         int v = (seed >> 16);
         srand(v);
         int idx = rand() % (i + 1); // rand() % (upper - lower + 1) + lower :  lower ~ upper
-        
+
         void *item1 = arrlist_get(arr, i);
         void *item2 = arrlist_get(arr, idx);
 
@@ -1370,35 +1409,36 @@ Linq *From(void *container) {
     lq->Except              = linq_except;
     lq->Union               = linq_union;
     lq->Intersect           = linq_intersect;
-  
+
     lq->SumInts             = linq_sumInts;
     lq->SumFloats           = linq_sumFloats;
-     
+
     lq->MaxInts             = linq_maxInts;
     lq->MaxFloats           = linq_maxFloats;
-     
+
     lq->MinInts             = linq_minInts;
     lq->MinFloats           = linq_minFloats;
-     
+
     lq->AverageInts         = linq_averageInts;
     lq->AverageFloats       = linq_averageFloats;
-     
+
     lq->Max                 = linq_max;
     lq->Min                 = linq_min;
-   
+
     lq->OrderBy             = linq_orderby;
     lq->OrderByDesc         = linq_orderbyDesc;
-     
+
     lq->GroupBy             = linq_groupby;
     lq->Zip                 = linq_zip;
-     
+
     lq->Single              = linq_single;
     lq->SingleWith          = linq_singleWith;
-     
+
     lq->Contains            = linq_contains;
     lq->Count               = linq_count;
     lq->CountWith           = linq_countWith;
-     
+
+    lq->JoinStr             = linq_joinStr;
     lq->Join                = linq_join;
     lq->GroupJoin           = linq_groupJoin;
 
@@ -1517,7 +1557,7 @@ Linq *Matches(bool ignoreCase, char *input, char *pattern) {
     int status;
     regex_t regex;
     char *pstr = input;
- 
+
     /* REG_EXTENDED: Compile modern ("extended") REs.
      * REG_NEWLINE: Compile for newline-sensitive matching.
      * */

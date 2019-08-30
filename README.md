@@ -203,6 +203,7 @@ int main(int argc, char **argv) {
 - [x] Contains
 - [x] Count
 - [x] CountWith
+- [x] JoinStr
 - [x] Join
 - [x] GroupJoin
 - [x] Aggregate

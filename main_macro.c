@@ -296,6 +296,12 @@ ArrayList testWithGroupBy2(ArrayList array) {
     return result;
 }
 
+char *testWithJoinStr(ArrayList str_array) {
+    Linq *lq = From(str_array);
+    char *result = lq->JOIN_STR("---");
+    return result;
+}
+
 ArrayList testWithJoin(Linq *innerLinq, ArrayList joinOwnerArr, ArrayList joinPetsArr) {
     Linq *lq = From(joinOwnerArr);
     ArrayList result = 
@@ -830,6 +836,15 @@ int main(int argc, char **argv) {
             printf("\tvalue=[%d]\n", TOINT(arrlist_get(value, j)));
         }
     }
+
+    printf("\n====================JOINStr====================\n");
+    ArrayList str_array = arrlist_new();
+    arrlist_append(str_array, str1);
+    arrlist_append(str_array, str2);
+    arrlist_append(str_array, str3);
+    arrlist_append(str_array, str4);
+    char *strResult = testWithJoinStr(str_array);
+    printf("strResult=[%s]\n", strResult);
 
     printf("\n====================JOIN====================\n");
     struct joinOwner *joinOwner1 = gc_malloc(sizeof(struct joinOwner));
