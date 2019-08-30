@@ -1583,12 +1583,12 @@ void *newStr(char *fmt, ...) {
     int len = vsnprintf(result, bufLen, fmt, ap);
     if (len >= bufLen) {
         result = gc_realloc(result, (len + 1) * sizeof(char));
-    }
-    va_end(ap);
+        va_end(ap);
 
-    va_start(ap, fmt);
-    vsnprintf(result, len + 1, fmt, ap);
-    va_end(ap);
+        va_start(ap, fmt);
+        vsnprintf(result, len + 1, fmt, ap);
+        va_end(ap);
+    }
 
     return result;
 }
