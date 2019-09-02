@@ -2,6 +2,8 @@
 #include "ArrayList.h"
 #include <gc.h>
 
+#define arrlist_memshift(s, offset, length) memmove((s) + (offset), (s), (length)* sizeof(s));
+
 static inline void PTR_SWAP(void **a, void **b) {
     void *t = *a;
     *a = *b;
@@ -26,9 +28,6 @@ ArrayList arrlist_new() {
     return a;
 }
 
-void arrlist_setFreeFunc(ArrayList a, void  (*freeItemFunc)(void *)) {
-    a->freeItemFunc = freeItemFunc;
-}
 
 static int arrlist_extend(ArrayList a, int newSize) {
     void **tmp = GC_realloc(a->data, sizeof(void *) * newSize);
@@ -74,14 +73,12 @@ int arrlist_remove(ArrayList a, int index) {
         return -1;
     }
 
+/*
     for (int i = index; i < (a->length - 1); i++) {
-        if (a->freeItemFunc != NULL) {
-            a->freeItemFunc(a->data[i]);
-        }
-
         a->data[i] = a->data[i + 1];
     }
-
+*/
+    arrlist_memshift(a->data + index + 1, -1, a->length - index);
     a->length--;
 
     return 0;
@@ -92,9 +89,12 @@ int arrlist_insert(ArrayList a, int index, void *val) {
         return -1;
     }
 
+/*
     for (int i = a->length ; i > index ; i--) {
         a->data[i] = a->data[i - 1];
     }
+*/
+    arrlist_memshift(a->data + index, 1, a->length - index);
 
     a->data[index] = val;
     a->length++;
@@ -115,10 +115,6 @@ int arrlist_set(ArrayList a, int index, void *val) {
         return -1;
     }
 
-    if (a->freeItemFunc != NULL) {
-        a->freeItemFunc(a->data[index]);
-    }
-
     a->data[index] = val;
 
     return 0;
@@ -127,11 +123,6 @@ int arrlist_set(ArrayList a, int index, void *val) {
 int arrlist_destroy(ArrayList a) {
     if (a == NULL) {
         return -1;
-    }
-    if (a->freeItemFunc != NULL) {
-        for (int i = 0; i < a->length; i++) {
-            a->freeItemFunc(a->data[i]);
-        }
     }
 
     GC_free(a->data);

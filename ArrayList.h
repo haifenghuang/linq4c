@@ -11,7 +11,6 @@ struct ArrayList {
     void **data;
     int length;    /* number of elements */
     int capacity;  /* capacity of arraylist */
-    void (*freeItemFunc)(void *); /* used to free the item when arraylist been destroyed. */
 };
 
 typedef struct ArrayList *ArrayList;
@@ -33,8 +32,6 @@ void arrlist_reverse(ArrayList a);
 
 /* sortOrder(0): Ascending, otherwise: Descending */
 void arrlist_sort(ArrayList a, ArrayListCompareFunc compareFn, int sortOrder);
-
-void arrlist_setFreeFunc(ArrayList a, void (*freeItemFunc)(void *));
 
 #endif
 
