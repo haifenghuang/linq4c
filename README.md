@@ -14,9 +14,9 @@
 ### Example using callbacks
 
 ```c
+#include <gc.h>
 #include "ArrayList.h"
 #include "linq.h"
-#include "malloc.h"
 
 bool WhereCallback(void *item) {
     char *str= (char *)item;
@@ -40,7 +40,7 @@ ArrayList testLinq(ArrayList array) {
 }
 
 int main() {
-    gc_init();
+    GC_INIT();
 
     char *str1 = "huang", *str2 = "hai", *str3 = "feng";
 
@@ -54,7 +54,6 @@ int main() {
         printf("%s\n", arrlist_get(result, i));
     }
 
-    gc_destroy();
     return 0;
 }
 ```
@@ -82,7 +81,7 @@ ArrayList testLinq(ArrayList array) {
 }
 
 int main() {
-    gc_init();
+    GC_INIT();
 
     char *str1 = "huang", *str2 = "hai", *str3 = "feng";
 
@@ -96,7 +95,6 @@ int main() {
         printf("%s\n", arrlist_get(result, i));
     }
 
-    gc_destroy();
     return 0;
 }
 ```
@@ -128,7 +126,7 @@ ArrayList testLinq(ArrayList array) {
 }
 
 int main(int argc, char **argv) {
-    gc_init();
+    GC_INIT();
 
     char *str1 = "huang", *str2 = "hai", *str3 = "feng";
 
@@ -142,9 +140,17 @@ int main(int argc, char **argv) {
         printf("%s\n", arrlist_get(result, i));
     }
 
-    gc_destroy();
     return 0;
 }
+```
+
+## Requirement
+
+As for the garbage collect, you need to install `Boehm GC`.
+
+```sh
+# yum install gc-devel      # RedHat family
+# apt-get install libgc-dev # Debian family
 ```
 
 ## What's implemented
@@ -216,10 +222,6 @@ int main(int argc, char **argv) {
 - [x] Print
 - [x] Println
 
-## Credits
-
-- faisalabujabal:
-    For his wonderful Garbage collector for C [gc4c](https://github.com/faisalabujabal/gc4c).
 
 ## License
 

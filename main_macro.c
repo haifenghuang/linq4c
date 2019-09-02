@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <gc.h>
 
 #include "ArrayList.h"
 #include "linq.h"
-#include "malloc.h"
 
 #define LINQ_PTR lq
 
@@ -283,7 +283,7 @@ ArrayList testWithGroupBy2(ArrayList array) {
         ->GROUPBY(
                   lambda(void *, (void *item) {
                       int i = TOINT(item);
-                      char *result = gc_malloc(8);
+                      char *result = GC_malloc(8);
                       if ( i % 2 == 0) {
                           strcpy(result, "even");
                           return result;
@@ -327,7 +327,7 @@ ArrayList testWithJoin(Linq *innerLinq, ArrayList joinOwnerArr, ArrayList joinPe
                    struct joinOwner *owner = (struct joinOwner *)item1;
                    struct joinPets  *pets = (struct joinPets *)item2;
 
-                   char *result = gc_malloc(128);
+                   char *result = GC_malloc(128);
                    sprintf(result, "{%s - %s}", owner->Name, pets->Name);
                    return result; }))
         ->TO_ARRAY();
@@ -352,9 +352,9 @@ ArrayList testWithGroupJoin(Linq *innerLinq, ArrayList outerArr) {
                         int *result = newInt(x % 2);
                         return result;}),
                     lambda(void *, (void *outerItem, void *innerArray) {
-                        int *len = gc_malloc(sizeof(int));
+                        int *len = GC_malloc(sizeof(int));
                         *len = arrlist_size((ArrayList)innerArray);
-                        struct GroupJoin_KeyValue *kv = gc_malloc(sizeof(struct GroupJoin_KeyValue));
+                        struct GroupJoin_KeyValue *kv = GC_malloc(sizeof(struct GroupJoin_KeyValue));
                         kv->Key = outerItem;
                         kv->Value = len;
                         return kv; }))
@@ -559,7 +559,7 @@ ArrayList testWithPrintln3() {
 }
 
 int main(int argc, char **argv) {
-    gc_init();
+    GC_INIT();
 
     int i = 0;
 
@@ -766,7 +766,7 @@ int main(int argc, char **argv) {
         char name[32];
         int age;
     };
-    struct Person *p = gc_malloc(sizeof(struct Person));
+    struct Person *p = GC_malloc(sizeof(struct Person));
     strcpy(p->name, "HuangHaiFeng");
     p->age = 40;
 
@@ -796,52 +796,52 @@ int main(int argc, char **argv) {
          {"Owner" : "Google",    "Name" : "GMail"}
          {"Owner" : "Google",    "Name" : "GDrive"}
      */
-    struct ProductInfo *pi1 = gc_malloc(sizeof(struct ProductInfo));
+    struct ProductInfo *pi1 = GC_malloc(sizeof(struct ProductInfo));
     strcpy(pi1->Owner, "Google"); strcpy(pi1->Name, "Chrome");
 
-    struct ProductInfo *pi2 = gc_malloc(sizeof(struct ProductInfo));
+    struct ProductInfo *pi2 = GC_malloc(sizeof(struct ProductInfo));
     strcpy(pi2->Owner, "Microsoft"); strcpy(pi2->Name, "Windows");
 
-    struct ProductInfo *pi3 = gc_malloc(sizeof(struct ProductInfo));
+    struct ProductInfo *pi3 = GC_malloc(sizeof(struct ProductInfo));
     strcpy(pi3->Owner, "Google"); strcpy(pi3->Name, "GMail");
 
-    struct ProductInfo *pi4 = gc_malloc(sizeof(struct ProductInfo));
+    struct ProductInfo *pi4 = GC_malloc(sizeof(struct ProductInfo));
     strcpy(pi4->Owner, "Microsoft"); strcpy(pi4->Name, "VisualStudio");
 
-    struct ProductInfo *pi5 = gc_malloc(sizeof(struct ProductInfo));
+    struct ProductInfo *pi5 = GC_malloc(sizeof(struct ProductInfo));
     strcpy(pi5->Owner, "Google"); strcpy(pi5->Name, "GMail");
 
-    struct ProductInfo *pi6 = gc_malloc(sizeof(struct ProductInfo));
+    struct ProductInfo *pi6 = GC_malloc(sizeof(struct ProductInfo));
     strcpy(pi6->Owner, "Microsoft"); strcpy(pi6->Name, "XBox");
 
-    struct ProductInfo *pi7 = gc_malloc(sizeof(struct ProductInfo));
+    struct ProductInfo *pi7 = GC_malloc(sizeof(struct ProductInfo));
     strcpy(pi7->Owner, "Google"); strcpy(pi7->Name, "GMail");
 
-    struct ProductInfo *pi8 = gc_malloc(sizeof(struct ProductInfo));
+    struct ProductInfo *pi8 = GC_malloc(sizeof(struct ProductInfo));
     strcpy(pi8->Owner, "Google"); strcpy(pi8->Name, "AppEngine");
 
-    struct ProductInfo *pi9 = gc_malloc(sizeof(struct ProductInfo));
+    struct ProductInfo *pi9 = GC_malloc(sizeof(struct ProductInfo));
     strcpy(pi9->Owner, "Intel"); strcpy(pi9->Name, "ParallelStudio");
 
-    struct ProductInfo *pi10 = gc_malloc(sizeof(struct ProductInfo));
+    struct ProductInfo *pi10 = GC_malloc(sizeof(struct ProductInfo));
     strcpy(pi10->Owner, "Intel"); strcpy(pi10->Name, "VTune");
 
-    struct ProductInfo *pi11 = gc_malloc(sizeof(struct ProductInfo));
+    struct ProductInfo *pi11 = GC_malloc(sizeof(struct ProductInfo));
     strcpy(pi11->Owner, "Microsoft"); strcpy(pi11->Name, "Office");
 
-    struct ProductInfo *pi12 = gc_malloc(sizeof(struct ProductInfo));
+    struct ProductInfo *pi12 = GC_malloc(sizeof(struct ProductInfo));
     strcpy(pi12->Owner, "Intel"); strcpy(pi12->Name, "Edison");
 
-    struct ProductInfo *pi13 = gc_malloc(sizeof(struct ProductInfo));
+    struct ProductInfo *pi13 = GC_malloc(sizeof(struct ProductInfo));
     strcpy(pi13->Owner, "Google"); strcpy(pi13->Name, "GMail");
 
-    struct ProductInfo *pi14 = gc_malloc(sizeof(struct ProductInfo));
+    struct ProductInfo *pi14 = GC_malloc(sizeof(struct ProductInfo));
     strcpy(pi14->Owner, "Microsoft"); strcpy(pi14->Name, "PowerShell");
 
-    struct ProductInfo *pi15 = gc_malloc(sizeof(struct ProductInfo));
+    struct ProductInfo *pi15 = GC_malloc(sizeof(struct ProductInfo));
     strcpy(pi15->Owner, "Google"); strcpy(pi15->Name, "GMail");
 
-    struct ProductInfo *pi16 = gc_malloc(sizeof(struct ProductInfo));
+    struct ProductInfo *pi16 = GC_malloc(sizeof(struct ProductInfo));
     strcpy(pi16->Owner, "Google"); strcpy(pi16->Name, "GDrive");
 
     ArrayList groupByArr = arrlist_new();
@@ -900,13 +900,13 @@ int main(int argc, char **argv) {
     printf("strResult=[%s]\n", strResult);
 
     printf("\n====================JOIN====================\n");
-    struct joinOwner *joinOwner1 = gc_malloc(sizeof(struct joinOwner));
+    struct joinOwner *joinOwner1 = GC_malloc(sizeof(struct joinOwner));
     strcpy(joinOwner1->Name, "Hedlund, Magnus");
 
-    struct joinOwner *joinOwner2 = gc_malloc(sizeof(struct joinOwner));
+    struct joinOwner *joinOwner2 = GC_malloc(sizeof(struct joinOwner));
     strcpy(joinOwner2->Name, "Adams, Terry");
 
-    struct joinOwner *joinOwner3 = gc_malloc(sizeof(struct joinOwner));
+    struct joinOwner *joinOwner3 = GC_malloc(sizeof(struct joinOwner));
     strcpy(joinOwner3->Name, "Weiss, Charlotte");
 
     ArrayList joinOwnerArr = arrlist_new();
@@ -914,22 +914,22 @@ int main(int argc, char **argv) {
     arrlist_append(joinOwnerArr, joinOwner2);
     arrlist_append(joinOwnerArr, joinOwner3);
 
-    struct joinPets *joinPets1 = gc_malloc(sizeof(struct joinPets));
+    struct joinPets *joinPets1 = GC_malloc(sizeof(struct joinPets));
     strcpy(joinPets1->Name, "Barley");
     joinPets1->Age = 8;
     joinPets1->Owner = joinOwner2;
 
-    struct joinPets *joinPets2 = gc_malloc(sizeof(struct joinPets));
+    struct joinPets *joinPets2 = GC_malloc(sizeof(struct joinPets));
     strcpy(joinPets2->Name, "Boots");
     joinPets2->Age = 4;
     joinPets2->Owner = joinOwner2;
 
-    struct joinPets *joinPets3 = gc_malloc(sizeof(struct joinPets));
+    struct joinPets *joinPets3 = GC_malloc(sizeof(struct joinPets));
     strcpy(joinPets3->Name, "Whiskers");
     joinPets3->Age = 1;
     joinPets3->Owner = joinOwner3;
 
-    struct joinPets *joinPets4 = gc_malloc(sizeof(struct joinPets));
+    struct joinPets *joinPets4 = GC_malloc(sizeof(struct joinPets));
     strcpy(joinPets4->Name, "Daisy");
     joinPets4->Age = 4;
     joinPets4->Owner = joinOwner1;
@@ -1142,12 +1142,12 @@ int main(int argc, char **argv) {
 
     printf("\n====================Println(1)====================\n");
     ArrayList printlnArr = arrlist_new();
-    struct dummyStruct *dummy1 = gc_malloc(sizeof(struct dummyStruct));
+    struct dummyStruct *dummy1 = GC_malloc(sizeof(struct dummyStruct));
     dummy1->str = "foo";
     dummy1->val = 1;
     arrlist_append(printlnArr, dummy1);
 
-    struct dummyStruct *dummy2 = gc_malloc(sizeof(struct dummyStruct));
+    struct dummyStruct *dummy2 = GC_malloc(sizeof(struct dummyStruct));
     dummy2->str = "bar";
     dummy2->val = 3;
     arrlist_append(printlnArr, dummy2);
@@ -1195,7 +1195,6 @@ int main(int argc, char **argv) {
 
 
     printf("\n\n");
-    gc_destroy();
     return 0;
 }
 

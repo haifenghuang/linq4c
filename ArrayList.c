@@ -1,6 +1,6 @@
 #include <string.h>
 #include "ArrayList.h"
-#include "malloc.h"
+#include <gc.h>
 
 static inline void PTR_SWAP(void **a, void **b) {
     void *t = *a;
@@ -9,14 +9,14 @@ static inline void PTR_SWAP(void **a, void **b) {
 }
 
 ArrayList arrlist_new() {
-    struct ArrayList *a = gc_malloc(sizeof(struct ArrayList));
+    struct ArrayList *a = GC_malloc(sizeof(struct ArrayList));
     if (a == NULL) {
         return NULL;
     }
 
-    a->data = gc_malloc(sizeof(void *) * ARRAYLIST_INIT_CAPACITY);
+    a->data = GC_malloc(sizeof(void *) * ARRAYLIST_INIT_CAPACITY);
     if (a->data == NULL) {
-        gc_free(a);
+        GC_free(a);
         return NULL;
     }
 
@@ -31,25 +31,11 @@ void arrlist_setFreeFunc(ArrayList a, void  (*freeItemFunc)(void *)) {
 }
 
 static int arrlist_extend(ArrayList a, int newSize) {
-#if 0
-    /* Below will core dump, gc4c's bug??? */
-    void **tmp = gc_realloc(a->data, sizeof(void *) * newSize);
+    void **tmp = GC_realloc(a->data, sizeof(void *) * newSize);
     if (tmp == NULL) {
         return -1;
     }
 
-    a->data = tmp;
-#endif
-    void **tmp = gc_malloc(sizeof(void *) * newSize);
-    if (tmp == NULL) {
-        return -1;
-    }
-
-    for (int i = 0; i < a->length; i++) {
-        tmp[i] = a->data[i];
-    }
-
-    gc_free(a->data);
     a->data = tmp;
 
     return 0;
@@ -148,8 +134,8 @@ int arrlist_destroy(ArrayList a) {
         }
     }
 
-    gc_free(a->data);
-    gc_free(a);
+    GC_free(a->data);
+    GC_free(a);
 
     return 0;
 }

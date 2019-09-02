@@ -4,10 +4,10 @@
 #include <regex.h>
 #include <stdarg.h>
 #include <time.h>
+#include <gc.h>
 
 #include "linq.h"
 #include "hashmap.h"
-#include "malloc.h"
 
 static Linq *linq_where(Linq *lq, Predicate predicateFn) {
     ArrayList arr = (ArrayList)lq->container;
@@ -892,7 +892,7 @@ static Linq *linq_groupby(Linq *lq, Selector keySelectFn, Equality keyEqualityFn
         } /* end for */
 
         if (!found) {
-            KeyValuePair *kv = gc_malloc(sizeof(KeyValuePair));
+            KeyValuePair *kv = GC_malloc(sizeof(KeyValuePair));
             kv->key = key;
             ArrayList valueArr = arrlist_new();
             arrlist_append(valueArr, val);
@@ -910,7 +910,7 @@ static Linq *linq_groupby(Linq *lq, Selector keySelectFn, Equality keyEqualityFn
     size_t setLen = hashmap_size(set);
     for (int j = 0; j < setLen; j++) {
         KeyValuePair *kv = hashmap_get(set, j);
-        Group *gp = gc_malloc(sizeof(Group));
+        Group *gp = GC_malloc(sizeof(Group));
         gp->Key   = kv->key;
         gp->Array = kv->value;
         arrlist_append(result, gp);
@@ -1031,8 +1031,7 @@ static char *linq_joinStr(Linq *lq, char *separator) {
     }
     total_len += 1;
 
-    /* char *result = gc_calloc(total_len, sizeof(char)); */
-    char *result = gc_malloc(total_len * sizeof(char));
+    char *result = GC_malloc(total_len * sizeof(char));
     memset(result, 0x00, sizeof(total_len));
 
     for (int i = 0; i < length; i++) {
@@ -1085,7 +1084,7 @@ static Linq *linq_join(Linq *lq,
         } /* end for */
 
         if (!found) {
-            KeyValuePair *kv = gc_malloc(sizeof(KeyValuePair));
+            KeyValuePair *kv = GC_malloc(sizeof(KeyValuePair));
             kv->key = innerKey;
             ArrayList valueArr = arrlist_new();
             arrlist_append(valueArr, innerItem);
@@ -1166,7 +1165,7 @@ static Linq *linq_groupJoin(Linq *lq,
         } /* end for */
 
         if (!found) {
-            KeyValuePair *kv = gc_malloc(sizeof(KeyValuePair));
+            KeyValuePair *kv = GC_malloc(sizeof(KeyValuePair));
             kv->key = innerKey;
             ArrayList valueArr = arrlist_new();
             arrlist_append(valueArr, innerItem);
@@ -1477,7 +1476,7 @@ static char *_linq_toStr(Linq *lq, char *separator, Stringizor stringizorFn, boo
     total_len += 1; /* for '\0' */
 
     const char *lineSep = needLine ? "\n" : "";
-    char *result = gc_malloc(total_len * sizeof(char));
+    char *result = GC_malloc(total_len * sizeof(char));
     memset(result, 0x00, sizeof(total_len));
 
     for (int i = 0; i < length; i++) {
@@ -1521,7 +1520,7 @@ static ArrayList linq_toArray(Linq *lq) {
 /* Sequence Generator Functions */
 
 Linq *From(void *container) {
-    Linq *lq = gc_malloc(sizeof(Linq));
+    Linq *lq = GC_malloc(sizeof(Linq));
     lq->container = container;
 
     lq->Where               = linq_where;
@@ -1664,7 +1663,7 @@ Linq *Repeat(void *item, int itemSize, int count) {
     ArrayList result = arrlist_new();
 
     for (int i = 0; i < count; i++) {
-        void *newItem = gc_malloc(itemSize);
+        void *newItem = GC_malloc(itemSize);
         memcpy(newItem, item, itemSize);
         arrlist_append(result, newItem);
 
@@ -1731,7 +1730,7 @@ Linq *Matches(bool ignoreCase, char *input, char *pattern) {
                 /* rm_so: regex-match, start-offset */
                 /* rm_eo: regex-match, end-offset */
                 int length = groups[g].rm_eo - groups[g].rm_so;
-                char *match = gc_malloc(length);
+                char *match = GC_malloc(length);
                 strncpy(match, pstr + groups[g].rm_so, length);
                 match[length] = '\0';
                 arrlist_append(arr, match);
@@ -1748,13 +1747,13 @@ Linq *Matches(bool ignoreCase, char *input, char *pattern) {
 }
 
 void *newInt(int value) {
-    int *result = (int *)gc_malloc(sizeof(int));
+    int *result = (int *)GC_malloc(sizeof(int));
     *result = value;
     return result;
 }
 
 void *newFloat(float value) {
-    float *result = (float *)gc_malloc(sizeof(float));
+    float *result = (float *)GC_malloc(sizeof(float));
     *result = value;
     return result;
 }
@@ -1763,17 +1762,12 @@ void *newStr(char *fmt, ...) {
     int bufLen = 64;
     va_list ap;
 
-    char *result = gc_malloc(bufLen * sizeof(char));
+    char *result = GC_malloc(bufLen * sizeof(char));
 
     va_start(ap, fmt);
     int len = vsnprintf(result, bufLen, fmt, ap);
     if (len >= bufLen) {
-        /* result = gc_realloc(result, (len + 1) * sizeof(char)); */
-        char *tmp = gc_malloc((len + 1) * sizeof(char));
-        for (int i = 0; i < bufLen; i++) {
-            tmp[i] = result[i];
-        }
-        result = tmp;
+        result = GC_realloc(result, (len + 1) * sizeof(char));
         va_end(ap);
 
         va_start(ap, fmt);
