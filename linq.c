@@ -222,6 +222,28 @@ static Linq *linq_take(Linq *lq, int number) {
     return lq;
 }
 
+static Linq *linq_takeEvery(Linq *lq, int step) {
+    ArrayList arr = (ArrayList)lq->container;
+    int length = arrlist_size(arr);
+
+    if (length == 0) {
+        return lq;
+    }
+
+    ArrayList result = arrlist_new();
+
+    for (int i = 0; i < length; i++) {
+        void *item = arrlist_get(arr, i);
+
+        if ( (i % step) == 0) {
+            arrlist_append(result, item);
+        }
+    }
+
+    lq->container = result;
+    return lq;
+}
+
 static Linq *linq_takeWhile(Linq *lq, Predicate predicateFn) {
     ArrayList arr = (ArrayList)lq->container;
     int length = arrlist_size(arr);
@@ -862,7 +884,7 @@ static Linq *linq_groupby(Linq *lq, Selector keySelectFn, Equality keyEqualityFn
         size_t setLen = hashmap_size(set);
         for (int j = 0; j < setLen; j++) {
             KeyValuePair *kv = hashmap_get(set, j);
-            if (keyEqualityFn(kv->key, key)) { //key equal
+            if (keyEqualityFn(kv->key, key)) { /* key equal */
                 found = true;
                 idx = j;
                 break;
@@ -994,27 +1016,28 @@ static char *linq_joinStr(Linq *lq, char *separator) {
     int length = arrlist_size(arr);
 
     if (length == 0) {
-        return newStr("");
+        return "";
     }
 
-    bool isEmpty = (separator == NULL || separator[0] == '\0');
+    bool hasSeparator = (separator == NULL || separator[0] == '\0');
     /* get total lenth we need to allocate */
     int total_len = 0;
     for (int i = 0; i < length; i++) {
         char *item = (char *)arrlist_get(arr, i);
-        if (isEmpty) {
-            total_len += strlen(item);
-        } else {
-            total_len += strlen(item) + strlen(separator);
+        total_len += strlen(item);
+        if (!hasSeparator) {
+            total_len += strlen(separator);
         }
     }
     total_len += 1;
 
-    char *result = gc_calloc(total_len, sizeof(char));
+    /* char *result = gc_calloc(total_len, sizeof(char)); */
+    char *result = gc_malloc(total_len * sizeof(char));
+    memset(result, 0x00, sizeof(total_len));
 
     for (int i = 0; i < length; i++) {
         char *item = (char *)arrlist_get(arr, i);
-        if (isEmpty) {
+        if (hasSeparator) {
             sprintf(result + strlen(result), "%s", item);
         } else {
             if (i == length - 1) {
@@ -1054,7 +1077,7 @@ static Linq *linq_join(Linq *lq,
         size_t setLen = hashmap_size(set);
         for (int j = 0; j < setLen; j++) {
             KeyValuePair *kv = hashmap_get(set, j);
-            if (keyEqualityFn(kv->key, innerKey)) { //key equal
+            if (keyEqualityFn(kv->key, innerKey)) { /* key equal */
                 found = true;
                 idx = j;
                 break;
@@ -1086,7 +1109,7 @@ static Linq *linq_join(Linq *lq,
         int idx = 0;
         for (int j = 0; j < setLen; j++) {
             KeyValuePair *kv = hashmap_get(set, j);
-            if (keyEqualityFn(kv->key, outerKey)) { //key equal
+            if (keyEqualityFn(kv->key, outerKey)) { /* key equal */
                 found = 1;
                 idx = j;
                 break;
@@ -1135,7 +1158,7 @@ static Linq *linq_groupJoin(Linq *lq,
         size_t setLen = hashmap_size(set);
         for (int j = 0; j < setLen; j++) {
             KeyValuePair *kv = hashmap_get(set, j);
-            if (keyEqualityFn(kv->key, innerKey)) { //key equal
+            if (keyEqualityFn(kv->key, innerKey)) { /* key equal */
                 found = true;
                 idx = j;
                 break;
@@ -1169,7 +1192,7 @@ static Linq *linq_groupJoin(Linq *lq,
         for (int j = 0; j < setLen; j++)
         {
             KeyValuePair *kv = hashmap_get(set, j);
-            if (keyEqualityFn(kv->key, outerKey)) { //key equal
+            if (keyEqualityFn(kv->key, outerKey)) { /* key equal */
                 found = 1;
                 idx = j;
                 break;
@@ -1327,11 +1350,11 @@ static Linq *linq_alternateAfter(Linq *lq, void *value) {
     ArrayList arr = (ArrayList)lq->container;
     int length = arrlist_size(arr);
 
-    ArrayList result = arrlist_new();
     if (length == 0) {
         return lq;
     }
 
+    ArrayList result = arrlist_new();
     for (int i = 0; i < length; i++) {
         void *item = arrlist_get(arr, i);
         arrlist_append(result, item);
@@ -1361,12 +1384,13 @@ static Linq *linq_shuffle(Linq *lq) {
         seed = (seed * 58321) + 11113;
         int v = (seed >> 16);
         srand(v);
-        int idx = rand() % (i + 1); // rand() % (upper - lower + 1) + lower :  lower ~ upper
+        /* rand() % (upper - lower + 1) + lower :  lower ~ upper */
+        int idx = rand() % (i + 1);
 
         void *item1 = arrlist_get(arr, i);
         void *item2 = arrlist_get(arr, idx);
 
-        //swap the two items
+        /* swap the two items */
         arrlist_set(arr, i, item2);
         arrlist_set(arr, idx, item1);
     }
@@ -1374,10 +1398,127 @@ static Linq *linq_shuffle(Linq *lq) {
     return lq;
 }
 
+static Linq *linq_slice(Linq *lq, int startIndex, int count) {
+    ArrayList arr = (ArrayList)lq->container;
+    int length = arrlist_size(arr);
+
+    if (length == 0) {
+        return lq;
+    }
+
+    return lq->Skip(lq, startIndex)->Take(lq, count);
+}
+
+static Linq *linq_pad(Linq *lq, int width, void *pad_value) {
+    ArrayList arr = (ArrayList)lq->container;
+    int length = arrlist_size(arr);
+
+    ArrayList result = arrlist_new();
+    for (int i = 0; i < length; i++) {
+        void *item = arrlist_get(arr, i);
+        arrlist_append(result, item);
+    }
+
+    while (length < width)
+    {
+        arrlist_append(result, pad_value);
+        length++;
+    }
+
+    lq->container = result;
+    return lq;
+}
+
+static Linq *linq_padBy(Linq *lq, int width, Selector selectFn) {
+    ArrayList arr = (ArrayList)lq->container;
+    int length = arrlist_size(arr);
+
+    ArrayList result = arrlist_new();
+    for (int i = 0; i < length; i++) {
+        void *item = arrlist_get(arr, i);
+        arrlist_append(result, item);
+    }
+
+    while (length < width)
+    {
+        arrlist_append(result, selectFn(newInt(length)));
+        length++;
+    }
+
+    lq->container = result;
+    return lq;
+}
+
+/* private function */
+static char *_linq_toStr(Linq *lq, char *separator, Stringizor stringizorFn, bool needLine) {
+    ArrayList arr = (ArrayList)lq->container;
+    int length = arrlist_size(arr);
+
+    if (length == 0) {
+        return "";
+    }
+
+    ArrayList strArr = arrlist_new();
+
+    bool hasSeparator = (separator == NULL || separator[0] == '\0');
+    /* get total lenth we need to allocate */
+    int total_len = 0;
+    for (int i = 0; i < length; i++) {
+        char *item = stringizorFn(i, arrlist_get(arr, i));
+        arrlist_append(strArr, item);
+        total_len += strlen(item);
+        if (!hasSeparator) {
+            total_len += strlen(separator);
+        }
+        if (needLine) {
+            total_len += strlen("\n");
+        }
+    }
+    total_len += 1; /* for '\0' */
+
+    const char *lineSep = needLine ? "\n" : "";
+    char *result = gc_malloc(total_len * sizeof(char));
+    memset(result, 0x00, sizeof(total_len));
+
+    for (int i = 0; i < length; i++) {
+        char *item = arrlist_get(strArr, i);
+
+        if (hasSeparator)
+        {
+            sprintf(result + strlen(result), "%s%s", item, lineSep);
+        } else {
+            if (i == length - 1) {
+                sprintf(result + strlen(result), "%s%s", item, lineSep);
+            } else {
+                sprintf(result + strlen(result), "%s%s%s", item, separator, lineSep);
+            }
+        }
+    }
+
+    return result;
+
+}
+
+static void linq_print(Linq *lq, char *separator, Stringizor stringizorFn) {
+    char *result = _linq_toStr(lq, separator, stringizorFn, false);
+    printf("%s", result);
+}
+
+static void linq_printLn(Linq *lq, Stringizor stringizorFn) {
+    char *result = _linq_toStr(lq, NULL, stringizorFn, true);
+    printf("%s", result);
+}
+
+static char *linq_toString(Linq *lq, char *separator, Stringizor stringizorFn) {
+    return _linq_toStr(lq, separator, stringizorFn, false);
+}
+
 static ArrayList linq_toArray(Linq *lq) {
     return (ArrayList)lq->container;
 }
 
+
+/* Sequence Generator Functions */
 
 Linq *From(void *container) {
     Linq *lq = gc_malloc(sizeof(Linq));
@@ -1393,6 +1534,7 @@ Linq *From(void *container) {
     lq->FirstOrDefault      = linq_firstOrDefault;
     lq->LastOrDefault       = linq_lastOrDefault;
     lq->Take                = linq_take;
+    lq->TakeEvery           = linq_takeEvery;
     lq->TakeWhile           = linq_takeWhile;
     lq->TakeWhileIndexed    = linq_takeWhileIndexed;
     lq->TakeExceptLast      = linq_takeExceptLast;
@@ -1457,6 +1599,14 @@ Linq *From(void *container) {
     lq->AlternateAfter      = linq_alternateAfter;
 
     lq->Shuffle             = linq_shuffle;
+    lq->Slice               = linq_slice;
+
+    lq->Pad                 = linq_pad;
+    lq->PadBy               = linq_padBy;
+
+    lq->Print               = linq_print;
+    lq->Println             = linq_printLn;
+    lq->ToString            = linq_toString;
 
     lq->ToArray             = linq_toArray;
 
@@ -1467,8 +1617,7 @@ Linq *RangeWithStep(int start, int count, int step) {
     ArrayList result = arrlist_new();
 
     for (int i = 0; i < count; i++) {
-        int *item = gc_malloc(sizeof(int));
-        *item = start + i * step;
+        int *item = newInt(start + i * step);
         arrlist_append(result, item);
     }
 
@@ -1483,14 +1632,12 @@ Linq *RangeTo(int start, int to) {
     ArrayList result = arrlist_new();
     if (start >= to) {
         for (int i = start; i >= to; i--) {
-            int *item = gc_malloc(sizeof(int));
-            *item = i;
+            int *item = newInt(i);
             arrlist_append(result, item);
         }
     } else {
         for (int i = start; i <= to; i++) {
-            int *item = gc_malloc(sizeof(int));
-            *item = i;
+            int *item = newInt(i);
             arrlist_append(result, item);
         }
     }
@@ -1502,8 +1649,7 @@ Linq *RangeDownWithStep(int start, int count, int step) {
     ArrayList result = arrlist_new();
 
     for (int i = 0; i < count; i++) {
-        int *item = gc_malloc(sizeof(int));
-        *item = start - i * step;
+        int *item = newInt(start - i * step);
         arrlist_append(result, item);
     }
 
@@ -1622,7 +1768,12 @@ void *newStr(char *fmt, ...) {
     va_start(ap, fmt);
     int len = vsnprintf(result, bufLen, fmt, ap);
     if (len >= bufLen) {
-        result = gc_realloc(result, (len + 1) * sizeof(char));
+        /* result = gc_realloc(result, (len + 1) * sizeof(char)); */
+        char *tmp = gc_malloc((len + 1) * sizeof(char));
+        for (int i = 0; i < bufLen; i++) {
+            tmp[i] = result[i];
+        }
+        result = tmp;
         va_end(ap);
 
         va_start(ap, fmt);

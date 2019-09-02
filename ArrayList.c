@@ -31,11 +31,25 @@ void arrlist_setFreeFunc(ArrayList a, void  (*freeItemFunc)(void *)) {
 }
 
 static int arrlist_extend(ArrayList a, int newSize) {
+#if 0
+    /* Below will core dump, gc4c's bug??? */
     void **tmp = gc_realloc(a->data, sizeof(void *) * newSize);
     if (tmp == NULL) {
         return -1;
     }
 
+    a->data = tmp;
+#endif
+    void **tmp = gc_malloc(sizeof(void *) * newSize);
+    if (tmp == NULL) {
+        return -1;
+    }
+
+    for (int i = 0; i < a->length; i++) {
+        tmp[i] = a->data[i];
+    }
+
+    gc_free(a->data);
     a->data = tmp;
 
     return 0;

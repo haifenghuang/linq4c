@@ -28,6 +28,11 @@ struct GroupJoin_KeyValue {
     void *Value;
 };
 
+struct dummyStruct {
+    char *str;
+    int val;
+};
+
 ArrayList testWithNormal(ArrayList array) {
     Linq *lq = From(array);
 
@@ -397,7 +402,7 @@ void *testWithAggregateWithSeedBy(ArrayList arr, char *seed) {
                                     return str2;
                                     }), 
                                 lambda(void *, (void *item) {
-                                    //convert to uppercase
+                                    /* convert to uppercase */
                                     char *result = newStr((char *)item);
                                     for(int i = 0; result[i] != '\0'; i++) {
                                         if (result[i] >= 'a' && result[i] <= 'z') {
@@ -503,6 +508,54 @@ ArrayList testWithShuffle(ArrayList shuffleArr) {
         ->TO_ARRAY();
 
     return result;
+}
+
+ArrayList testWithSlice(ArrayList sliceArr) {
+    Linq *lq = From(sliceArr);
+    ArrayList result = 
+        lq
+        ->SLICE(2, 3)
+        ->TO_ARRAY();
+
+    return result;
+}
+
+ArrayList testWithPrint(ArrayList printArr) {
+    Linq *lq = From(printArr);
+    lq
+    ->PRINT("->", lambda(char *, (int idx, void *item) {
+                return (char *)item; })
+           );
+}
+
+ArrayList testWithPrintln(ArrayList printlnArr) {
+    Linq *lq = From(printlnArr);
+    lq
+    ->PRINTLN(lambda(char *, (int idx, void *item) {
+                struct dummyStruct *dummy = (struct dummyStruct *)item;
+                return newStr("%s:%d", dummy->str, dummy->val); })
+           );
+}
+
+ArrayList testWithPrintln2(ArrayList printlnArr) {
+    Linq *lq = From(printlnArr);
+    lq
+    ->PRINTLN(lambda(char *, (int idx, void *item) {
+                return newStr("%d:%d", idx, TOINT(item)); }
+             ));
+}
+
+ArrayList testWithPrintln3() {
+    Linq *lq = Range(0, 20);
+    lq
+    ->WHERE(lambda(bool, (void *item) { return TOINT(item) % 3 == 0; }))
+    ->SELECT(lambda(void *, (void *item) {
+                int x = TOINT(item) * 10;
+                return newInt(x);
+                }))
+    ->PRINTLN(lambda(char *, (int idx, void *item) {
+                return newStr("%d:%d", idx, TOINT(item)); }
+             ));
 }
 
 int main(int argc, char **argv) {
@@ -916,20 +969,20 @@ int main(int argc, char **argv) {
 
     printf("\n====================Aggregate====================\n");
     ArrayList aggArr1 = arrlist_new();
-    arrlist_append(aggArr1, str1); //"huang"
-    arrlist_append(aggArr1, str4); //"welcome"
-    arrlist_append(aggArr1, str2); //"hai"
-    arrlist_append(aggArr1, str3); //"feng"
+    arrlist_append(aggArr1, str1); /* "huang" */
+    arrlist_append(aggArr1, str4); /* "welcome" */
+    arrlist_append(aggArr1, str2); /* "hai" */
+    arrlist_append(aggArr1, str3); /* "feng" */
     char *aggResult1 = (char *)testWithAggregate(aggArr1);
     printf("result = [%s]\n", aggResult1);
 
 
     printf("\n====================Aggregate With Seed====================\n");
     ArrayList aggArr2 = arrlist_new();
-    arrlist_append(aggArr2, str1); //"huang"
-    arrlist_append(aggArr2, str4); //"welcome"
-    arrlist_append(aggArr2, str2); //"hai"
-    arrlist_append(aggArr2, str3); //"feng"
+    arrlist_append(aggArr2, str1); /* "huang" */
+    arrlist_append(aggArr2, str4); /* "welcome" */
+    arrlist_append(aggArr2, str2); /* "hai" */
+    arrlist_append(aggArr2, str3); /* "feng" */
     char *seed2 = "passionfruit";
     char *aggResult2 = (char *)testWithAggregateWithSeed(aggArr2, seed2);
     printf("result = [%s]\n", aggResult2);
@@ -937,10 +990,10 @@ int main(int argc, char **argv) {
 
     printf("\n====================Aggregate With Seed By====================\n");
     ArrayList aggArr3 = arrlist_new();
-    arrlist_append(aggArr3, str1); //"huang"
-    arrlist_append(aggArr3, str4); //"welcome"
-    arrlist_append(aggArr3, str2); //"hai"
-    arrlist_append(aggArr3, str3); //"feng"
+    arrlist_append(aggArr3, str1); /* "huang" */
+    arrlist_append(aggArr3, str4); /* "welcome" */
+    arrlist_append(aggArr3, str2); /* "hai" */
+    arrlist_append(aggArr3, str3); /* "feng" */
     char *seed3 = "banana";
     char *aggResult3 = (char *)testWithAggregateWithSeedBy(aggArr3, seed3);
     printf("result = [%s]\n", aggResult3);
@@ -1067,6 +1120,52 @@ int main(int argc, char **argv) {
         printf("%d\n", TOINT(arrlist_get(shuffleResult, i)));
     }
     
+
+    printf("\n====================Slice====================\n");
+    ArrayList sliceArr = arrlist_new();
+    for (int i = 0; i < 10; i++) {
+        int *x = newInt(i);
+         arrlist_append(sliceArr, x);
+    }
+    ArrayList sliceResult = testWithSlice(sliceArr);
+    for (int i = 0; i < arrlist_size(sliceResult); i++) {
+        printf("%d\n", TOINT(arrlist_get(sliceResult, i)));
+    }
+
+    printf("\n====================Print====================\n");
+    ArrayList printArr = arrlist_new();
+    arrlist_append(printArr, str1);
+    arrlist_append(printArr, str2);
+    arrlist_append(printArr, str3);
+    arrlist_append(printArr, str4);
+    testWithPrint(printArr);
+
+    printf("\n====================Println(1)====================\n");
+    ArrayList printlnArr = arrlist_new();
+    struct dummyStruct *dummy1 = gc_malloc(sizeof(struct dummyStruct));
+    dummy1->str = "foo";
+    dummy1->val = 1;
+    arrlist_append(printlnArr, dummy1);
+
+    struct dummyStruct *dummy2 = gc_malloc(sizeof(struct dummyStruct));
+    dummy2->str = "bar";
+    dummy2->val = 3;
+    arrlist_append(printlnArr, dummy2);
+    testWithPrintln(printlnArr);
+
+
+    printf("\n====================Println(2)====================\n");
+    ArrayList println2Arr = arrlist_new();
+    for (int i = 0; i < 10; i++) {
+         arrlist_append(println2Arr, newInt(i));
+    }
+    testWithPrintln2(println2Arr);
+
+    printf("\n====================Println(3)====================\n");
+    testWithPrintln3();
+
+
+
     printf("\n====================Cycle & ForEach====================\n");
     ArrayList arrayCycle = arrlist_new();
     arrlist_append(arrayCycle, str1);

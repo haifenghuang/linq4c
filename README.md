@@ -11,7 +11,7 @@
 
 ## Examples
 
-### Example using callbacks:
+### Example using callbacks
 
 ```c
 #include "ArrayList.h"
@@ -24,15 +24,13 @@ bool WhereCallback(void *item) {
 }
 
 void *SelectCallback(void *item) {
-    char *newStr = gc_malloc(64);
-    sprintf(newStr, "%s_1", (char *)item);
-    return newStr;
+    return newStr("%s_1", (char *)item);
 }
 
 ArrayList testLinq(ArrayList array) {
     Linq *lq = From(array);
 
-    ArrayList result = 
+    ArrayList result =
         lq
         ->Where(lq, WhereCallback)
         ->Select(lq, SelectCallback)
@@ -61,24 +59,22 @@ int main() {
 }
 ```
 
-### Example with lambdas:
+### Example with lambdas
 
 ```c
 ArrayList testLinq(ArrayList array) {
     Linq *lq = From(array);
 
-    ArrayList result = 
+    ArrayList result =
         lq
-        ->Where(lq, 
+        ->Where(lq,
                 lambda(bool, (void *item) {
                     char *str= (char *)item;
                     return str[0] == 'h';
                 }))
         ->Select(lq,
                  lambda(void *, (void *item) {
-                     char *newStr = gc_malloc(64);
-                     sprintf(newStr, "%s_1", (char *)item);
-                     return newStr;
+                     return newStr("%s_1", (char *)item);
                  }))
         ->ToArray(lq);
 
@@ -105,7 +101,7 @@ int main() {
 }
 ```
 
-### Example with macros:
+### Example with macros
 
 ```c
 #define LINQ_PTR lq
@@ -116,15 +112,13 @@ bool WhereCallback(void *item) {
 }
 
 void *SelectCallback(void *item) {
-    char *newStr = gc_malloc(64);
-    sprintf(newStr, "%s_1", (char *)item);
-    return newStr;
+    return newStr("%s_1", (char *)item);
 }
 
 ArrayList testLinq(ArrayList array) {
     Linq *lq = From(array);
 
-    ArrayList result = 
+    ArrayList result =
         lq
         ->WHERE(WhereCallback)
         ->SELECT(SelectCallback)
@@ -151,7 +145,6 @@ int main(int argc, char **argv) {
     gc_destroy();
     return 0;
 }
-
 ```
 
 ## What's implemented
@@ -168,6 +161,7 @@ int main(int argc, char **argv) {
 - [x] FirstOrDefault
 - [x] LastOrDefault
 - [x] Take
+- [x] TakeEvery
 - [x] TakeWhile
 - [x] TakeWhileIndexed
 - [x] TakeExceptLast
@@ -216,13 +210,17 @@ int main(int argc, char **argv) {
 - [x] AlternateBefore
 - [x] AlternateAfter
 - [x] Shuffle
+- [x] Slice
+- [x] Pad
+- [x] PadBy
+- [x] Print
+- [x] Println
 
 ## Credits
 
-* faisalabujabal:
+- faisalabujabal:
     For his wonderful Garbage collector for C [gc4c](https://github.com/faisalabujabal/gc4c).
 
 ## License
 
 MIT
-

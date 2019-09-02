@@ -23,7 +23,15 @@ void hashmap_destroy(HashMap hm) {
 void hashmap_add(HashMap hm, KeyValuePair *value) {
     if (hm->length == hm->capacity) {
         hm->capacity += HASHMAP_INIT_CAPACITY;
-        hm->data = gc_realloc(hm->data, sizeof(KeyValuePair *) * hm->capacity);
+
+        /* Below will core dump, gc4c's bug??? */
+        /* hm->data = gc_realloc(hm->data, sizeof(KeyValuePair *) * hm->capacity); */
+
+        KeyValuePair **tmp = gc_malloc(sizeof(KeyValuePair *) * hm->capacity);
+        for (int i = 0; i < hm->length; i++) {
+            tmp[i] = hm->data[i];
+        }
+        hm->data = tmp;
     }
 
     hm->data[hm->length] = value;

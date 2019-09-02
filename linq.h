@@ -13,7 +13,10 @@
 
 #define lambda(ret, body) ({ ret __fn__ body __fn__; })
 
+/* Convert (void *) to an int */
 #define TOINT(item)   (*(int *)(item))
+/* Convert (void *) to a float */
+#define TOFLOAT(item) (*(float *)(item))
 
 #define COMPARE_NUM(a, b) do{ \
     if ((a) > (b)) return 1; \
@@ -41,6 +44,8 @@ typedef void *(*Accumulator)(void *, void *);
 
 typedef void (*ForEachAction)(int, void *);
 
+typedef char *(*Stringizor)(int, void *);
+
 #define WHERE(predicateFn)                              Where(LINQ_PTR, predicateFn)
 #define WHERE_INDEXED(predicateIdxFn)                   WhereIndexed(LINQ_PTR, predicateIdxFn)
 #define SELECT(selectFn)                                Select(LINQ_PTR, selectFn)
@@ -51,6 +56,7 @@ typedef void (*ForEachAction)(int, void *);
 #define FIRST_OR_DEFAULT(predicateFn)                   FirstOrDefault(LINQ_PTR, predicateFn)
 #define LAST_OR_DEFAULT(predicateFn)                    LastOrDefault(LINQ_PTR, predicateFn)
 #define TAKE(num)                                       Take(LINQ_PTR, num)
+#define TAKE_EVERY(step)                                TakeEvery(LINQ_PTR, step)
 #define TAKE_WHILE(predicateFn)                         TakeWhile(LINQ_PTR, predicateFn)
 #define TAKE_WHILE_INDEXED(predicateIdxFn)              TakeWhileIndexed(LINQ_PTR, predicateIdxFn)
 #define TAKE_EXCEPT_LAST(count)                         TakeExceptLast(LINQ_PTR, count)
@@ -117,6 +123,15 @@ typedef void (*ForEachAction)(int, void *);
 #define ALTERNATE_AFTER(value)                          AlternateAfter(LINQ_PTR, value)
 
 #define SHUFFLE()                                       Shuffle(LINQ_PTR)
+#define SLICE(startIndex, count)                        Slice(LINQ_PTR, startIndex, count)
+
+#define PAD(width, pad_value)                           Pad(LINQ_PTR, width, pad_value)
+#define PAD_BY(width, selectFn)                         PadBy(LINQ_PTR, width, selectFn)
+
+#define PRINT(separator, stringizorFn)                  Print(LINQ_PTR, separator, stringizorFn)
+#define PRINTLN(stringizorFn)                           Println(LINQ_PTR, stringizorFn)
+
+#define TO_STRING(separator, stringizorFn)              ToString(LINQ_PTR, separator, stringizorFn)
 #define TO_ARRAY()                                      ToArray(LINQ_PTR)
 
 /* Used to store `GroupBy` result. */
@@ -147,6 +162,7 @@ struct tagLinq {
     void *(*LastOrDefault)(Linq *lq, Predicate predicateFn);
 
     Linq *(*Take)(Linq *lq, int number);
+    Linq *(*TakeEvery)(Linq *lq, int step);
     Linq *(*TakeWhile)(Linq *lq, Predicate predicateFn);
     Linq *(*TakeWhileIndexed)(Linq *lq, PredicateIdx predicateIdxFn);
     Linq *(*TakeExceptLast)(Linq *lq, int count);
@@ -268,6 +284,21 @@ struct tagLinq {
 
     /* Inline shuffle */
     Linq *(*Shuffle)(Linq *lq);
+
+    /* Extracts a contiguous count of elements from a sequence at a particular zero-based starting index */
+    Linq *(*Slice)(Linq *lq, int startIndex, int count);
+
+    /* Pads a sequence with a given filler value if it is narrower (shorter in length) than a given width. */
+    Linq *(*Pad)(Linq *lq, int width, void *pad_value);
+    Linq *(*PadBy)(Linq *lq, int width, Selector selectFn);
+
+    /* Print the sequence using separator */
+    void (*Print)(Linq *lq, char *separator, Stringizor stringizorFn);
+    /* Print each sequence item with a new line */
+    void (*Println)(Linq *lq, Stringizor stringizorFn);
+
+    /* convert the sequence into a string. */
+    char *(*ToString)(Linq *lq, char *separator, Stringizor stringizorFn);
 
     /* Returns the containing array of the linq sequence. */
     ArrayList (*ToArray)(Linq *lq);
