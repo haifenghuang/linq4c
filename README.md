@@ -5,7 +5,7 @@
 
 ## Features
 
-- Most of the LINQ methods(50+) are supported.
+- Most of the LINQ methods(60+) are supported.
 - Chaining of LINQ methods are supported.
 - Lambda is supported(slow).
 
