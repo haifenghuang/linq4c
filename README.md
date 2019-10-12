@@ -11,6 +11,8 @@
 
 ## Examples
 
+<kbd>For more examples, please see the main.c</kbd>
+
 ### Example using callbacks
 
 ```c
