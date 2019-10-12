@@ -11,7 +11,7 @@
 
 ## Examples
 
-<kbd>For more examples, please see the main.c</kbd>
+<kbd>For more examples, please see the main.c file.</kbd>
 
 ### Example using callbacks
 
